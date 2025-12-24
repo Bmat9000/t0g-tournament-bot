@@ -2,54 +2,48 @@ from __future__ import annotations
 
 import logging
 from logging.handlers import RotatingFileHandler
-from pathlib import Path
 
 from .config import ROOT, env_bool
 
-LOG_NAME = "T0G_Tournament_Bot"
-LOG_FMT = "[%(asctime)s] [%(levelname)s] %(name)s: %(message)s"
 
-def setup_logging() -> logging.Logger:
+def setup_logging(logger_name: str = "T0G_Tournament_Bot") -> logging.Logger:
     """Configure console + rotating file logging.
 
-    Cleanup Roadmap v1: centralize logging config (no behavior changes).
-    - Uses ROOT/logs/bot.log
-    - Console logging via basicConfig
-    - Rotating file handler attached to root logger
-    - Discord logger kept at INFO unless DEBUG=true
+    - Safe to call multiple times (won't duplicate handlers)
+    - Uses DEBUG=true in .env to increase verbosity
     """
-    debug = env_bool("DEBUG", False)
-    level = logging.DEBUG if debug else logging.INFO
+    log_level = logging.DEBUG if env_bool("DEBUG", False) else logging.INFO
 
-    log_dir: Path = ROOT / "logs"
+    log_dir = ROOT / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
-    log_file: Path = log_dir / "bot.log"
+    log_file = log_dir / "bot.log"
 
-    # basicConfig only has effect once per process (unless force=True),
-    # so calling it here is safe and avoids duplicate console handlers.
-    logging.basicConfig(level=level, format=LOG_FMT)
+    # Root logger
+    root = logging.getLogger()
+    root.setLevel(log_level)
 
-    root_logger = logging.getLogger()
-    root_logger.setLevel(level)
+    fmt = logging.Formatter("[%(asctime)s] [%(levelname)s] %(name)s: %(message)s")
 
-    # Avoid adding duplicate file handlers if setup_logging() is called again.
-    for h in list(root_logger.handlers):
-        if isinstance(h, RotatingFileHandler):
-            # Keep the existing one (assume configured)
-            break
-    else:
+    # Avoid duplicate handlers if reloaded
+    if not any(isinstance(h, logging.StreamHandler) for h in root.handlers):
+        sh = logging.StreamHandler()
+        sh.setLevel(log_level)
+        sh.setFormatter(fmt)
+        root.addHandler(sh)
+
+    if not any(isinstance(h, RotatingFileHandler) for h in root.handlers):
         fh = RotatingFileHandler(
             log_file,
-            maxBytes=5_000_000,  # 5 MB
+            maxBytes=5_000_000,
             backupCount=5,
             encoding="utf-8",
         )
-        fh.setLevel(level)
-        fh.setFormatter(logging.Formatter(LOG_FMT))
-        root_logger.addHandler(fh)
+        fh.setLevel(log_level)
+        fh.setFormatter(fmt)
+        root.addHandler(fh)
 
-    # Discord's internal logger can be noisy
+    # Discord.py can be noisy; keep it at INFO unless DEBUG
     discord_logger = logging.getLogger("discord")
-    discord_logger.setLevel(level if debug else logging.INFO)
+    discord_logger.setLevel(logging.DEBUG if log_level == logging.DEBUG else logging.INFO)
 
-    return logging.getLogger(LOG_NAME)
+    return logging.getLogger(logger_name)

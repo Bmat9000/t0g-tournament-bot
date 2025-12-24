@@ -3,121 +3,26 @@
 # ✅ Write retry wrapper (run_db) to gracefully handle "database is locked"
 # ✅ Centralized DB helpers so cogs never open ad-hoc sqlite connections
 #
-# 1.1 DONE: sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
-#          + PRAGMAs per connection:
-#             journal_mode=WAL, synchronous=NORMAL, foreign_keys=ON, busy_timeout
-#
-# 1.2 DONE: run_db(fn) retry wrapper for writes (3–5 tries)
-#
-# 1.3 You implement in cogs by ONLY calling functions from this file.
-#     (Examples after the file.)
+# Cleanup Roadmap v1 - Step 5:
+# - Shared connection + retry helpers moved to core.db (no behavior changes)
+# - This file keeps the same public API used by the cogs.
 
 from __future__ import annotations
 
-import random
-import sqlite3
 import time
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TypeVar
+from typing import Any, Dict, Optional
 
-T = TypeVar("T")
+import sqlite3
 
-# -----------------------------
-# Paths (centralized)
-# -----------------------------
-from core.config import DB_PATH  # single source of truth for DB location
+from core.db import get_db_connection, run_db, with_conn
 
 
 def _now() -> int:
     return int(time.time())
 
 
-# -----------------------------
-# 1.2 Retry wrapper for writes
-# -----------------------------
-def run_db(
-    fn: Callable[[], T],
-    *,
-    retries: int = 5,          # 3–5 is ideal
-    base_delay: float = 0.12,  # small sleeps
-    jitter: float = 0.08
-) -> T:
-    """
-    Retry wrapper for SQLite operations that can hit WAL/busy locks.
-
-    Use this around WRITE operations (INSERT/UPDATE/DELETE/BEGIN IMMEDIATE).
-    It retries only for "database is locked/busy" OperationalError.
-    """
-    last_err: Optional[Exception] = None
-
-    for attempt in range(1, retries + 1):
-        try:
-            return fn()
-        except sqlite3.OperationalError as e:
-            msg = str(e).lower()
-            if ("locked" not in msg) and ("busy" not in msg):
-                raise  # real operational error, don't retry
-
-            last_err = e
-            if attempt == retries:
-                break
-
-            # backoff grows slightly per attempt + random jitter to avoid stampede
-            time.sleep(base_delay * attempt + random.uniform(0, jitter))
-
-    # If we get here, we exhausted retries
-    raise last_err  # type: ignore[misc]
-
-
-# -----------------------------
-# 1.1 Connection + PRAGMAs
-# -----------------------------
-def get_db_connection() -> sqlite3.Connection:
-    """
-    Creates a SQLite connection configured for Discord bot concurrency:
-
-    - WAL mode: faster reads while writes happen
-    - NORMAL sync: stable + faster (behavior safe for this use)
-    - foreign_keys ON: cascade deletes etc work
-    - busy_timeout: waits instead of failing immediately
-    - check_same_thread=False: allows use from different tasks/threads safely
-      (Still best practice: open/close per call, keep writes short.)
-    """
-    conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-
-    # PRAGMAs (per connection)
-    conn.execute("PRAGMA journal_mode = WAL;")
-    conn.execute("PRAGMA synchronous = NORMAL;")
-    conn.execute("PRAGMA foreign_keys = ON;")
-    conn.execute("PRAGMA busy_timeout = 30000;")  # 30s
-    conn.execute("PRAGMA temp_store = MEMORY;")
-
-    # Cache ~20MB (negative means KB). Nice speed win with low risk.
-    conn.execute("PRAGMA cache_size = -20000;")
-
-    # Optional but helpful to keep WAL from growing too large
-    conn.execute("PRAGMA wal_autocheckpoint = 1000;")
-
-    return conn
-
-
-def with_conn(fn):
-    """
-    Decorator: opens/closes a DB connection automatically.
-    """
-    def wrapper(*args, **kwargs):
-        conn = get_db_connection()
-        try:
-            return fn(conn, *args, **kwargs)
-        finally:
-            conn.close()
-    return wrapper
-
-
 def _dict(row: Optional[sqlite3.Row]) -> Optional[Dict[str, Any]]:
     return dict(row) if row is not None else None
-
-
 # -----------------------------
 # Schema
 # -----------------------------
