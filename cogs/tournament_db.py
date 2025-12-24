@@ -1,27 +1,30 @@
 # tournament_db.py
-# ✅ SQLite stability + speed focused DB layer (WAL, indexes, safe helpers)
-# ✅ Bots + players treated the same (everyone is a "participant")
-# ✅ Designed for Discord tournament bot use (teams, membership, bracket matches, actions log)
+# ✅ SQLite stability + speed (WAL + busy_timeout + foreign keys)
+# ✅ Write retry wrapper (run_db) to gracefully handle "database is locked"
+# ✅ Centralized DB helpers so cogs never open ad-hoc sqlite connections
 #
-# Drop-in usage:
-#   from tournament_db import init_db, get_tournament, create_tournament, ...
+# 1.1 DONE: sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
+#          + PRAGMAs per connection:
+#             journal_mode=WAL, synchronous=NORMAL, foreign_keys=ON, busy_timeout
 #
-# Notes:
-# - This file is self-contained and safe to copy/paste.
-# - Uses WAL + NORMAL sync (fast + stable). If you want maximum durability, change to FULL.
+# 1.2 DONE: run_db(fn) retry wrapper for writes (3–5 tries)
+#
+# 1.3 You implement in cogs by ONLY calling functions from this file.
+#     (Examples after the file.)
 
 from __future__ import annotations
 
+import random
 import sqlite3
 import time
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TypeVar
+
+T = TypeVar("T")
 
 # -----------------------------
-# Paths / connection
+# Paths
 # -----------------------------
-
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -32,20 +35,71 @@ def _now() -> int:
     return int(time.time())
 
 
+# -----------------------------
+# 1.2 Retry wrapper for writes
+# -----------------------------
+def run_db(
+    fn: Callable[[], T],
+    *,
+    retries: int = 5,          # 3–5 is ideal
+    base_delay: float = 0.12,  # small sleeps
+    jitter: float = 0.08
+) -> T:
+    """
+    Retry wrapper for SQLite operations that can hit WAL/busy locks.
+
+    Use this around WRITE operations (INSERT/UPDATE/DELETE/BEGIN IMMEDIATE).
+    It retries only for "database is locked/busy" OperationalError.
+    """
+    last_err: Optional[Exception] = None
+
+    for attempt in range(1, retries + 1):
+        try:
+            return fn()
+        except sqlite3.OperationalError as e:
+            msg = str(e).lower()
+            if ("locked" not in msg) and ("busy" not in msg):
+                raise  # real operational error, don't retry
+
+            last_err = e
+            if attempt == retries:
+                break
+
+            # backoff grows slightly per attempt + random jitter to avoid stampede
+            time.sleep(base_delay * attempt + random.uniform(0, jitter))
+
+    # If we get here, we exhausted retries
+    raise last_err  # type: ignore[misc]
+
+
+# -----------------------------
+# 1.1 Connection + PRAGMAs
+# -----------------------------
 def get_db_connection() -> sqlite3.Connection:
     """
-    Open a connection with speed + stability PRAGMAs set.
+    Creates a SQLite connection configured for Discord bot concurrency:
+
+    - WAL mode: faster reads while writes happen
+    - NORMAL sync: stable + faster (behavior safe for this use)
+    - foreign_keys ON: cascade deletes etc work
+    - busy_timeout: waits instead of failing immediately
+    - check_same_thread=False: allows use from different tasks/threads safely
+      (Still best practice: open/close per call, keep writes short.)
     """
-    conn = sqlite3.connect(DB_PATH, timeout=30, isolation_level=None)  # autocommit; we do manual BEGIN when needed
+    conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
     conn.row_factory = sqlite3.Row
 
-    # ---- Performance + stability ----
-    conn.execute("PRAGMA foreign_keys = ON;")
+    # PRAGMAs (per connection)
     conn.execute("PRAGMA journal_mode = WAL;")
-    conn.execute("PRAGMA synchronous = NORMAL;")  # change to FULL if you prefer max durability
-    conn.execute("PRAGMA temp_store = MEMORY;")
-    conn.execute("PRAGMA cache_size = -20000;")   # ~20MB cache (negative = KB)
+    conn.execute("PRAGMA synchronous = NORMAL;")
+    conn.execute("PRAGMA foreign_keys = ON;")
     conn.execute("PRAGMA busy_timeout = 30000;")  # 30s
+    conn.execute("PRAGMA temp_store = MEMORY;")
+
+    # Cache ~20MB (negative means KB). Nice speed win with low risk.
+    conn.execute("PRAGMA cache_size = -20000;")
+
+    # Optional but helpful to keep WAL from growing too large
     conn.execute("PRAGMA wal_autocheckpoint = 1000;")
 
     return conn
@@ -53,7 +107,7 @@ def get_db_connection() -> sqlite3.Connection:
 
 def with_conn(fn):
     """
-    Decorator: open/close conn automatically.
+    Decorator: opens/closes a DB connection automatically.
     """
     def wrapper(*args, **kwargs):
         conn = get_db_connection()
@@ -71,11 +125,7 @@ def _dict(row: Optional[sqlite3.Row]) -> Optional[Dict[str, Any]]:
 # -----------------------------
 # Schema
 # -----------------------------
-
 SCHEMA_SQL = """
--- ============================
--- Core tournament table
--- ============================
 CREATE TABLE IF NOT EXISTS tournaments (
     guild_id            INTEGER NOT NULL,
     tournament_id       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,7 +134,6 @@ CREATE TABLE IF NOT EXISTS tournaments (
     created_at          INTEGER NOT NULL,
     updated_at          INTEGER NOT NULL,
 
-    -- settings (keep simple; you can extend as needed)
     team_size           INTEGER NOT NULL DEFAULT 2,       -- 1..6
     best_of             INTEGER NOT NULL DEFAULT 3,
     join_open           INTEGER NOT NULL DEFAULT 1,       -- 0/1
@@ -92,7 +141,6 @@ CREATE TABLE IF NOT EXISTS tournaments (
     captain_scoring     INTEGER NOT NULL DEFAULT 0,       -- 0/1
     screenshots_required INTEGER NOT NULL DEFAULT 0,      -- 0/1
 
-    -- channel/category ids (optional)
     category_id         INTEGER,
     admin_channel_id    INTEGER,
     announcements_channel_id INTEGER,
@@ -110,12 +158,9 @@ ON tournaments(guild_id, status);
 CREATE INDEX IF NOT EXISTS idx_tournaments_guild_updated
 ON tournaments(guild_id, updated_at);
 
--- ============================
--- Participants (players AND bots)
--- ============================
 CREATE TABLE IF NOT EXISTS participants (
     guild_id        INTEGER NOT NULL,
-    user_id         INTEGER NOT NULL,          -- Discord ID (for bots too)
+    user_id         INTEGER NOT NULL,
     is_bot          INTEGER NOT NULL DEFAULT 0,
     display_name    TEXT,
     created_at      INTEGER NOT NULL,
@@ -126,10 +171,6 @@ CREATE TABLE IF NOT EXISTS participants (
 CREATE INDEX IF NOT EXISTS idx_participants_guild_bot
 ON participants(guild_id, is_bot);
 
--- ============================
--- Tournament membership
--- (who has joined a tournament)
--- ============================
 CREATE TABLE IF NOT EXISTS tournament_participants (
     tournament_id   INTEGER NOT NULL,
     guild_id        INTEGER NOT NULL,
@@ -143,19 +184,16 @@ CREATE TABLE IF NOT EXISTS tournament_participants (
 CREATE INDEX IF NOT EXISTS idx_tp_tournament
 ON tournament_participants(tournament_id);
 
--- ============================
--- Teams
--- ============================
 CREATE TABLE IF NOT EXISTS teams (
     tournament_id   INTEGER NOT NULL,
     team_id         INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id        INTEGER NOT NULL,
     name            TEXT NOT NULL,
-    captain_user_id INTEGER NOT NULL,          -- Discord ID (could be bot if you want)
-    role_id         INTEGER,                   -- Discord role id for the team
-    hub_channel_id  INTEGER,                   -- Discord private channel id for the team
-    ready           INTEGER NOT NULL DEFAULT 0, -- 0/1
-    is_bot_team     INTEGER NOT NULL DEFAULT 0, -- 0/1
+    captain_user_id INTEGER NOT NULL,
+    role_id         INTEGER,
+    hub_channel_id  INTEGER,
+    ready           INTEGER NOT NULL DEFAULT 0,
+    is_bot_team     INTEGER NOT NULL DEFAULT 0,
     created_at      INTEGER NOT NULL,
     updated_at      INTEGER NOT NULL,
     FOREIGN KEY (tournament_id) REFERENCES tournaments(tournament_id) ON DELETE CASCADE
@@ -167,9 +205,6 @@ ON teams(tournament_id, ready);
 CREATE INDEX IF NOT EXISTS idx_teams_tournament_bot
 ON teams(tournament_id, is_bot_team);
 
--- ============================
--- Team members
--- ============================
 CREATE TABLE IF NOT EXISTS team_members (
     tournament_id   INTEGER NOT NULL,
     team_id         INTEGER NOT NULL,
@@ -185,21 +220,18 @@ CREATE TABLE IF NOT EXISTS team_members (
 CREATE INDEX IF NOT EXISTS idx_team_members_team
 ON team_members(team_id);
 
--- ============================
--- Bracket matches
--- ============================
 CREATE TABLE IF NOT EXISTS bracket_matches (
     tournament_id   INTEGER NOT NULL,
     match_id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    round_no        INTEGER NOT NULL,          -- 1..N
-    match_no        INTEGER NOT NULL,          -- 1.. per round
+    round_no        INTEGER NOT NULL,
+    match_no        INTEGER NOT NULL,
     team_a_id       INTEGER,
     team_b_id       INTEGER,
     winner_team_id  INTEGER,
     score_a         INTEGER,
     score_b         INTEGER,
     status          TEXT NOT NULL DEFAULT 'pending', -- pending/active/complete
-    match_channel_id INTEGER,                  -- temporary match channel id
+    match_channel_id INTEGER,
     created_at      INTEGER NOT NULL,
     updated_at      INTEGER NOT NULL,
     FOREIGN KEY (tournament_id) REFERENCES tournaments(tournament_id) ON DELETE CASCADE,
@@ -214,14 +246,11 @@ ON bracket_matches(tournament_id, round_no, match_no);
 CREATE INDEX IF NOT EXISTS idx_bracket_status
 ON bracket_matches(tournament_id, status);
 
--- ============================
--- Action log (for debugging + admin tools)
--- ============================
 CREATE TABLE IF NOT EXISTS action_log (
     guild_id        INTEGER NOT NULL,
     tournament_id   INTEGER,
     action          TEXT NOT NULL,
-    details_json    TEXT,              -- store extra info as JSON string if you want
+    details_json    TEXT,
     created_at      INTEGER NOT NULL
 );
 
@@ -232,21 +261,15 @@ ON action_log(guild_id, created_at);
 
 @with_conn
 def init_db(conn: sqlite3.Connection) -> None:
-    conn.executescript(SCHEMA_SQL)
+    # schema creation is a write, so wrap in retry
+    def _write():
+        conn.executescript(SCHEMA_SQL)
+    run_db(_write)
 
 
 # -----------------------------
-# Generic helpers
+# Tiny SQL helpers
 # -----------------------------
-
-def _exec(conn: sqlite3.Connection, sql: str, params: Tuple[Any, ...] = ()) -> sqlite3.Cursor:
-    return conn.execute(sql, params)
-
-
-def _execmany(conn: sqlite3.Connection, sql: str, rows: Iterable[Tuple[Any, ...]]) -> None:
-    conn.executemany(sql, rows)
-
-
 def _fetchone(conn: sqlite3.Connection, sql: str, params: Tuple[Any, ...] = ()) -> Optional[sqlite3.Row]:
     return conn.execute(sql, params).fetchone()
 
@@ -256,7 +279,7 @@ def _fetchall(conn: sqlite3.Connection, sql: str, params: Tuple[Any, ...] = ()) 
 
 
 def _begin(conn: sqlite3.Connection) -> None:
-    conn.execute("BEGIN IMMEDIATE;")  # blocks writers, avoids race conditions
+    conn.execute("BEGIN IMMEDIATE;")
 
 
 def _commit(conn: sqlite3.Connection) -> None:
@@ -270,7 +293,6 @@ def _rollback(conn: sqlite3.Connection) -> None:
 # -----------------------------
 # Tournaments
 # -----------------------------
-
 @with_conn
 def create_tournament(
     conn: sqlite3.Connection,
@@ -282,23 +304,26 @@ def create_tournament(
     open_join_mode: bool = True,
 ) -> int:
     now = _now()
-    _begin(conn)
-    try:
-        cur = _exec(
-            conn,
-            """
-            INSERT INTO tournaments
-            (guild_id, name, status, created_at, updated_at, team_size, best_of, join_open, open_join_mode)
-            VALUES (?, ?, 'active', ?, ?, ?, ?, ?, ?)
-            """,
-            (guild_id, name, now, now, int(team_size), int(best_of), int(join_open), int(open_join_mode)),
-        )
-        tid = int(cur.lastrowid)
-        _commit(conn)
-        return tid
-    except Exception:
-        _rollback(conn)
-        raise
+
+    def _write() -> int:
+        _begin(conn)
+        try:
+            cur = conn.execute(
+                """
+                INSERT INTO tournaments
+                (guild_id, name, status, created_at, updated_at, team_size, best_of, join_open, open_join_mode)
+                VALUES (?, ?, 'active', ?, ?, ?, ?, ?, ?)
+                """,
+                (guild_id, name, now, now, int(team_size), int(best_of), int(join_open), int(open_join_mode)),
+            )
+            tid = int(cur.lastrowid)
+            _commit(conn)
+            return tid
+        except Exception:
+            _rollback(conn)
+            raise
+
+    return run_db(_write)
 
 
 @with_conn
@@ -318,41 +343,7 @@ def get_active_tournament(conn: sqlite3.Connection, guild_id: int) -> Optional[D
 
 @with_conn
 def get_tournament(conn: sqlite3.Connection, tournament_id: int) -> Optional[Dict[str, Any]]:
-    row = _fetchone(conn, "SELECT * FROM tournaments WHERE tournament_id = ? LIMIT 1", (tournament_id,))
-    return _dict(row)
-
-
-@with_conn
-def update_tournament_channels(conn: sqlite3.Connection, tournament_id: int, **channel_ids: Any) -> None:
-    # only allow known columns
-    allowed = {
-        "category_id",
-        "admin_channel_id",
-        "announcements_channel_id",
-        "rules_channel_id",
-        "create_team_channel_id",
-        "teams_channel_id",
-        "chat_channel_id",
-        "bracket_channel_id",
-        "results_channel_id",
-    }
-    sets = []
-    vals: List[Any] = []
-    for k, v in channel_ids.items():
-        if k in allowed:
-            sets.append(f"{k} = ?")
-            vals.append(v)
-
-    if not sets:
-        return
-
-    vals.append(_now())
-    vals.append(tournament_id)
-
-    conn.execute(
-        f"UPDATE tournaments SET {', '.join(sets)}, updated_at = ? WHERE tournament_id = ?",
-        tuple(vals),
-    )
+    return _dict(_fetchone(conn, "SELECT * FROM tournaments WHERE tournament_id = ? LIMIT 1", (tournament_id,)))
 
 
 @with_conn
@@ -369,32 +360,76 @@ def set_tournament_setting(conn: sqlite3.Connection, tournament_id: int, key: st
     }
     if key not in allowed:
         raise ValueError(f"Invalid tournament setting: {key}")
-    conn.execute(
-        f"UPDATE tournaments SET {key} = ?, updated_at = ? WHERE tournament_id = ?",
-        (value, _now(), tournament_id),
-    )
+
+    def _write():
+        conn.execute(
+            f"UPDATE tournaments SET {key} = ?, updated_at = ? WHERE tournament_id = ?",
+            (value, _now(), tournament_id),
+        )
+
+    run_db(_write)
+
+
+@with_conn
+def update_tournament_channels(conn: sqlite3.Connection, tournament_id: int, **channel_ids: Any) -> None:
+    allowed = {
+        "category_id",
+        "admin_channel_id",
+        "announcements_channel_id",
+        "rules_channel_id",
+        "create_team_channel_id",
+        "teams_channel_id",
+        "chat_channel_id",
+        "bracket_channel_id",
+        "results_channel_id",
+    }
+    sets: List[str] = []
+    vals: List[Any] = []
+
+    for k, v in channel_ids.items():
+        if k in allowed:
+            sets.append(f"{k} = ?")
+            vals.append(v)
+
+    if not sets:
+        return
+
+    vals.append(_now())
+    vals.append(tournament_id)
+
+    def _write():
+        conn.execute(
+            f"UPDATE tournaments SET {', '.join(sets)}, updated_at = ? WHERE tournament_id = ?",
+            tuple(vals),
+        )
+
+    run_db(_write)
 
 
 @with_conn
 def delete_tournament(conn: sqlite3.Connection, tournament_id: int) -> None:
     """
-    DB-side deletion. Discord cleanup (channels/roles) happens in your bot code.
-    Cascades remove teams, members, bracket matches, tournament_participants.
+    DB-side delete. Discord channel/role deletes are in your bot code.
     """
-    _begin(conn)
-    try:
-        conn.execute("UPDATE tournaments SET status = 'deleted', updated_at = ? WHERE tournament_id = ?", (_now(), tournament_id))
-        conn.execute("DELETE FROM tournaments WHERE tournament_id = ?", (tournament_id,))
-        _commit(conn)
-    except Exception:
-        _rollback(conn)
-        raise
+    def _write():
+        _begin(conn)
+        try:
+            conn.execute(
+                "UPDATE tournaments SET status = 'deleted', updated_at = ? WHERE tournament_id = ?",
+                (_now(), tournament_id),
+            )
+            conn.execute("DELETE FROM tournaments WHERE tournament_id = ?", (tournament_id,))
+            _commit(conn)
+        except Exception:
+            _rollback(conn)
+            raise
+
+    run_db(_write)
 
 
 # -----------------------------
 # Participants (players + bots)
 # -----------------------------
-
 @with_conn
 def upsert_participant(
     conn: sqlite3.Connection,
@@ -404,55 +439,60 @@ def upsert_participant(
     is_bot: bool = False,
 ) -> None:
     now = _now()
-    conn.execute(
-        """
-        INSERT INTO participants (guild_id, user_id, is_bot, display_name, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-        ON CONFLICT(guild_id, user_id) DO UPDATE SET
-            is_bot = excluded.is_bot,
-            display_name = COALESCE(excluded.display_name, participants.display_name),
-            updated_at = excluded.updated_at
-        """,
-        (guild_id, user_id, int(is_bot), display_name, now, now),
-    )
+
+    def _write():
+        conn.execute(
+            """
+            INSERT INTO participants (guild_id, user_id, is_bot, display_name, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(guild_id, user_id) DO UPDATE SET
+                is_bot = excluded.is_bot,
+                display_name = COALESCE(excluded.display_name, participants.display_name),
+                updated_at = excluded.updated_at
+            """,
+            (guild_id, user_id, int(is_bot), display_name, now, now),
+        )
+
+    run_db(_write)
 
 
 @with_conn
 def join_tournament(conn: sqlite3.Connection, tournament_id: int, guild_id: int, user_id: int) -> None:
-    """
-    Adds participant to tournament membership.
-    """
     now = _now()
-    _begin(conn)
-    try:
-        conn.execute(
-            """
-            INSERT OR IGNORE INTO tournament_participants (tournament_id, guild_id, user_id, joined_at)
-            VALUES (?, ?, ?, ?)
-            """,
-            (tournament_id, guild_id, user_id, now),
-        )
-        conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (now, tournament_id))
-        _commit(conn)
-    except Exception:
-        _rollback(conn)
-        raise
+
+    def _write():
+        _begin(conn)
+        try:
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO tournament_participants (tournament_id, guild_id, user_id, joined_at)
+                VALUES (?, ?, ?, ?)
+                """,
+                (tournament_id, guild_id, user_id, now),
+            )
+            conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (now, tournament_id))
+            _commit(conn)
+        except Exception:
+            _rollback(conn)
+            raise
+
+    run_db(_write)
 
 
 @with_conn
 def remove_from_tournament(conn: sqlite3.Connection, tournament_id: int, user_id: int) -> None:
-    """
-    Removes membership AND team membership (if any). Team auto-management is handled by your bot logic.
-    """
-    _begin(conn)
-    try:
-        conn.execute("DELETE FROM team_members WHERE tournament_id = ? AND user_id = ?", (tournament_id, user_id))
-        conn.execute("DELETE FROM tournament_participants WHERE tournament_id = ? AND user_id = ?", (tournament_id, user_id))
-        conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (_now(), tournament_id))
-        _commit(conn)
-    except Exception:
-        _rollback(conn)
-        raise
+    def _write():
+        _begin(conn)
+        try:
+            conn.execute("DELETE FROM team_members WHERE tournament_id = ? AND user_id = ?", (tournament_id, user_id))
+            conn.execute("DELETE FROM tournament_participants WHERE tournament_id = ? AND user_id = ?", (tournament_id, user_id))
+            conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (_now(), tournament_id))
+            _commit(conn)
+        except Exception:
+            _rollback(conn)
+            raise
+
+    run_db(_write)
 
 
 @with_conn
@@ -474,7 +514,6 @@ def list_tournament_participants(conn: sqlite3.Connection, tournament_id: int) -
 # -----------------------------
 # Teams
 # -----------------------------
-
 @with_conn
 def user_team_id(conn: sqlite3.Connection, tournament_id: int, user_id: int) -> Optional[int]:
     row = _fetchone(
@@ -494,27 +533,28 @@ def create_team(
     captain_user_id: int,
     is_bot_team: bool = False,
 ) -> int:
-    """
-    Creates a team. Does NOT auto-add members; call add_team_member.
-    """
     now = _now()
-    _begin(conn)
-    try:
-        cur = conn.execute(
-            """
-            INSERT INTO teams
-            (tournament_id, guild_id, name, captain_user_id, is_bot_team, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            (tournament_id, guild_id, name, captain_user_id, int(is_bot_team), now, now),
-        )
-        team_id = int(cur.lastrowid)
-        conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (now, tournament_id))
-        _commit(conn)
-        return team_id
-    except Exception:
-        _rollback(conn)
-        raise
+
+    def _write() -> int:
+        _begin(conn)
+        try:
+            cur = conn.execute(
+                """
+                INSERT INTO teams
+                (tournament_id, guild_id, name, captain_user_id, is_bot_team, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (tournament_id, guild_id, name, captain_user_id, int(is_bot_team), now, now),
+            )
+            team_id = int(cur.lastrowid)
+            conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (now, tournament_id))
+            _commit(conn)
+            return team_id
+        except Exception:
+            _rollback(conn)
+            raise
+
+    return run_db(_write)
 
 
 @with_conn
@@ -524,7 +564,7 @@ def set_team_discord_refs(
     role_id: Optional[int] = None,
     hub_channel_id: Optional[int] = None,
 ) -> None:
-    sets = []
+    sets: List[str] = []
     vals: List[Any] = []
     if role_id is not None:
         sets.append("role_id = ?")
@@ -534,86 +574,96 @@ def set_team_discord_refs(
         vals.append(hub_channel_id)
     if not sets:
         return
+
     vals.append(_now())
     vals.append(team_id)
-    conn.execute(f"UPDATE teams SET {', '.join(sets)}, updated_at = ? WHERE team_id = ?", tuple(vals))
+
+    def _write():
+        conn.execute(
+            f"UPDATE teams SET {', '.join(sets)}, updated_at = ? WHERE team_id = ?",
+            tuple(vals),
+        )
+
+    run_db(_write)
 
 
 @with_conn
 def add_team_member(conn: sqlite3.Connection, tournament_id: int, team_id: int, guild_id: int, user_id: int) -> None:
     now = _now()
-    _begin(conn)
-    try:
-        # Ensure they are in tournament
-        conn.execute(
-            "INSERT OR IGNORE INTO tournament_participants (tournament_id, guild_id, user_id, joined_at) VALUES (?, ?, ?, ?)",
-            (tournament_id, guild_id, user_id, now),
-        )
-        # Enforce one-team-per-user per tournament via PRIMARY KEY (tournament_id, user_id)
-        conn.execute(
-            "INSERT INTO team_members (tournament_id, team_id, guild_id, user_id, joined_at) VALUES (?, ?, ?, ?, ?)",
-            (tournament_id, team_id, guild_id, user_id, now),
-        )
-        conn.execute("UPDATE teams SET updated_at = ? WHERE team_id = ?", (now, team_id))
-        conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (now, tournament_id))
-        _commit(conn)
-    except Exception:
-        _rollback(conn)
-        raise
+
+    def _write():
+        _begin(conn)
+        try:
+            # Ensure tournament membership exists
+            conn.execute(
+                "INSERT OR IGNORE INTO tournament_participants (tournament_id, guild_id, user_id, joined_at) VALUES (?, ?, ?, ?)",
+                (tournament_id, guild_id, user_id, now),
+            )
+
+            # Enforce one-team-per-user (PRIMARY KEY (tournament_id, user_id))
+            conn.execute(
+                "INSERT INTO team_members (tournament_id, team_id, guild_id, user_id, joined_at) VALUES (?, ?, ?, ?, ?)",
+                (tournament_id, team_id, guild_id, user_id, now),
+            )
+
+            conn.execute("UPDATE teams SET updated_at = ? WHERE team_id = ?", (now, team_id))
+            conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (now, tournament_id))
+            _commit(conn)
+        except Exception:
+            _rollback(conn)
+            raise
+
+    run_db(_write)
 
 
 @with_conn
 def remove_team_member(conn: sqlite3.Connection, tournament_id: int, user_id: int) -> None:
     now = _now()
-    _begin(conn)
-    try:
-        row = _fetchone(conn, "SELECT team_id FROM team_members WHERE tournament_id = ? AND user_id = ?", (tournament_id, user_id))
-        conn.execute("DELETE FROM team_members WHERE tournament_id = ? AND user_id = ?", (tournament_id, user_id))
-        if row:
-            conn.execute("UPDATE teams SET updated_at = ? WHERE team_id = ?", (now, int(row["team_id"])))
-        conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (now, tournament_id))
-        _commit(conn)
-    except Exception:
-        _rollback(conn)
-        raise
+
+    def _write():
+        _begin(conn)
+        try:
+            row = _fetchone(conn, "SELECT team_id FROM team_members WHERE tournament_id = ? AND user_id = ?", (tournament_id, user_id))
+            conn.execute("DELETE FROM team_members WHERE tournament_id = ? AND user_id = ?", (tournament_id, user_id))
+            if row:
+                conn.execute("UPDATE teams SET updated_at = ? WHERE team_id = ?", (now, int(row["team_id"])))
+            conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (now, tournament_id))
+            _commit(conn)
+        except Exception:
+            _rollback(conn)
+            raise
+
+    run_db(_write)
 
 
 @with_conn
 def set_team_ready(conn: sqlite3.Connection, team_id: int, ready: bool) -> None:
-    conn.execute("UPDATE teams SET ready = ?, updated_at = ? WHERE team_id = ?", (int(ready), _now(), team_id))
+    def _write():
+        conn.execute("UPDATE teams SET ready = ?, updated_at = ? WHERE team_id = ?", (int(ready), _now(), team_id))
+    run_db(_write)
 
 
 @with_conn
 def delete_team(conn: sqlite3.Connection, team_id: int) -> None:
-    _begin(conn)
-    try:
-        # team_members + bracket references cascade / set null as defined
-        conn.execute("DELETE FROM teams WHERE team_id = ?", (team_id,))
-        _commit(conn)
-    except Exception:
-        _rollback(conn)
-        raise
+    def _write():
+        _begin(conn)
+        try:
+            conn.execute("DELETE FROM teams WHERE team_id = ?", (team_id,))
+            _commit(conn)
+        except Exception:
+            _rollback(conn)
+            raise
+    run_db(_write)
 
 
 @with_conn
 def list_teams(conn: sqlite3.Connection, tournament_id: int) -> List[Dict[str, Any]]:
-    rows = _fetchall(
-        conn,
-        """
-        SELECT *
-        FROM teams
-        WHERE tournament_id = ?
-        ORDER BY created_at ASC
-        """,
-        (tournament_id,),
-    )
-    return [dict(r) for r in rows]
+    return [dict(r) for r in _fetchall(conn, "SELECT * FROM teams WHERE tournament_id = ? ORDER BY created_at ASC", (tournament_id,))]
 
 
 @with_conn
 def get_team(conn: sqlite3.Connection, team_id: int) -> Optional[Dict[str, Any]]:
-    row = _fetchone(conn, "SELECT * FROM teams WHERE team_id = ? LIMIT 1", (team_id,))
-    return _dict(row)
+    return _dict(_fetchone(conn, "SELECT * FROM teams WHERE team_id = ? LIMIT 1", (team_id,)))
 
 
 @with_conn
@@ -634,38 +684,30 @@ def team_members(conn: sqlite3.Connection, tournament_id: int, team_id: int) -> 
 
 @with_conn
 def count_team_members(conn: sqlite3.Connection, tournament_id: int, team_id: int) -> int:
-    row = _fetchone(
-        conn,
-        "SELECT COUNT(*) AS c FROM team_members WHERE tournament_id = ? AND team_id = ?",
-        (tournament_id, team_id),
-    )
+    row = _fetchone(conn, "SELECT COUNT(*) AS c FROM team_members WHERE tournament_id = ? AND team_id = ?", (tournament_id, team_id))
     return int(row["c"]) if row else 0
 
 
 @with_conn
 def list_ready_teams(conn: sqlite3.Connection, tournament_id: int) -> List[Dict[str, Any]]:
-    rows = _fetchall(
-        conn,
-        "SELECT * FROM teams WHERE tournament_id = ? AND ready = 1 ORDER BY created_at ASC",
-        (tournament_id,),
-    )
-    return [dict(r) for r in rows]
+    return [dict(r) for r in _fetchall(conn, "SELECT * FROM teams WHERE tournament_id = ? AND ready = 1 ORDER BY created_at ASC", (tournament_id,))]
 
 
 # -----------------------------
 # Bracket
 # -----------------------------
-
 @with_conn
 def clear_bracket(conn: sqlite3.Connection, tournament_id: int) -> None:
-    _begin(conn)
-    try:
-        conn.execute("DELETE FROM bracket_matches WHERE tournament_id = ?", (tournament_id,))
-        conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (_now(), tournament_id))
-        _commit(conn)
-    except Exception:
-        _rollback(conn)
-        raise
+    def _write():
+        _begin(conn)
+        try:
+            conn.execute("DELETE FROM bracket_matches WHERE tournament_id = ?", (tournament_id,))
+            conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (_now(), tournament_id))
+            _commit(conn)
+        except Exception:
+            _rollback(conn)
+            raise
+    run_db(_write)
 
 
 @with_conn
@@ -680,23 +722,27 @@ def insert_bracket_match(
     match_channel_id: Optional[int] = None,
 ) -> int:
     now = _now()
-    _begin(conn)
-    try:
-        cur = conn.execute(
-            """
-            INSERT INTO bracket_matches
-            (tournament_id, round_no, match_no, team_a_id, team_b_id, status, match_channel_id, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (tournament_id, round_no, match_no, team_a_id, team_b_id, status, match_channel_id, now, now),
-        )
-        mid = int(cur.lastrowid)
-        conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (now, tournament_id))
-        _commit(conn)
-        return mid
-    except Exception:
-        _rollback(conn)
-        raise
+
+    def _write() -> int:
+        _begin(conn)
+        try:
+            cur = conn.execute(
+                """
+                INSERT INTO bracket_matches
+                (tournament_id, round_no, match_no, team_a_id, team_b_id, status, match_channel_id, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (tournament_id, round_no, match_no, team_a_id, team_b_id, status, match_channel_id, now, now),
+            )
+            mid = int(cur.lastrowid)
+            conn.execute("UPDATE tournaments SET updated_at = ? WHERE tournament_id = ?", (now, tournament_id))
+            _commit(conn)
+            return mid
+        except Exception:
+            _rollback(conn)
+            raise
+
+    return run_db(_write)
 
 
 @with_conn
@@ -708,23 +754,26 @@ def update_bracket_match_score(
     winner_team_id: Optional[int],
     status: str = "complete",
 ) -> None:
-    now = _now()
-    conn.execute(
-        """
-        UPDATE bracket_matches
-        SET score_a = ?, score_b = ?, winner_team_id = ?, status = ?, updated_at = ?
-        WHERE match_id = ?
-        """,
-        (score_a, score_b, winner_team_id, status, now, match_id),
-    )
+    def _write():
+        conn.execute(
+            """
+            UPDATE bracket_matches
+            SET score_a = ?, score_b = ?, winner_team_id = ?, status = ?, updated_at = ?
+            WHERE match_id = ?
+            """,
+            (score_a, score_b, winner_team_id, status, _now(), match_id),
+        )
+    run_db(_write)
 
 
 @with_conn
 def set_bracket_match_channel(conn: sqlite3.Connection, match_id: int, match_channel_id: Optional[int]) -> None:
-    conn.execute(
-        "UPDATE bracket_matches SET match_channel_id = ?, updated_at = ? WHERE match_id = ?",
-        (match_channel_id, _now(), match_id),
-    )
+    def _write():
+        conn.execute(
+            "UPDATE bracket_matches SET match_channel_id = ?, updated_at = ? WHERE match_id = ?",
+            (match_channel_id, _now(), match_id),
+        )
+    run_db(_write)
 
 
 @with_conn
@@ -744,21 +793,20 @@ def get_bracket_matches(conn: sqlite3.Connection, tournament_id: int) -> List[Di
 
 @with_conn
 def get_match(conn: sqlite3.Connection, match_id: int) -> Optional[Dict[str, Any]]:
-    row = _fetchone(conn, "SELECT * FROM bracket_matches WHERE match_id = ? LIMIT 1", (match_id,))
-    return _dict(row)
+    return _dict(_fetchone(conn, "SELECT * FROM bracket_matches WHERE match_id = ? LIMIT 1", (match_id,)))
 
 
 # -----------------------------
-# Admin utilities (kick/ban/seed support hooks)
+# Action log (debug/admin)
 # -----------------------------
-# (DB only; your bot will enforce these)
-
 @with_conn
 def log_action(conn: sqlite3.Connection, guild_id: int, action: str, tournament_id: Optional[int] = None, details_json: Optional[str] = None) -> None:
-    conn.execute(
-        "INSERT INTO action_log (guild_id, tournament_id, action, details_json, created_at) VALUES (?, ?, ?, ?, ?)",
-        (guild_id, tournament_id, action, details_json, _now()),
-    )
+    def _write():
+        conn.execute(
+            "INSERT INTO action_log (guild_id, tournament_id, action, details_json, created_at) VALUES (?, ?, ?, ?, ?)",
+            (guild_id, tournament_id, action, details_json, _now()),
+        )
+    run_db(_write)
 
 
 @with_conn
@@ -772,9 +820,8 @@ def recent_actions(conn: sqlite3.Connection, guild_id: int, limit: int = 25) -> 
 
 
 # -----------------------------
-# Fast checks used in UI/panels
+# Quick UI counts
 # -----------------------------
-
 @with_conn
 def tournament_counts(conn: sqlite3.Connection, tournament_id: int) -> Dict[str, int]:
     row1 = _fetchone(conn, "SELECT COUNT(*) AS c FROM tournament_participants WHERE tournament_id = ?", (tournament_id,))
@@ -789,11 +836,9 @@ def tournament_counts(conn: sqlite3.Connection, tournament_id: int) -> Dict[str,
 
 @with_conn
 def is_user_in_tournament(conn: sqlite3.Connection, tournament_id: int, user_id: int) -> bool:
-    row = _fetchone(conn, "SELECT 1 FROM tournament_participants WHERE tournament_id = ? AND user_id = ? LIMIT 1", (tournament_id, user_id))
-    return row is not None
+    return _fetchone(conn, "SELECT 1 FROM tournament_participants WHERE tournament_id = ? AND user_id = ? LIMIT 1", (tournament_id, user_id)) is not None
 
 
 @with_conn
 def is_user_in_team(conn: sqlite3.Connection, tournament_id: int, user_id: int) -> bool:
-    row = _fetchone(conn, "SELECT 1 FROM team_members WHERE tournament_id = ? AND user_id = ? LIMIT 1", (tournament_id, user_id))
-    return row is not None
+    return _fetchone(conn, "SELECT 1 FROM team_members WHERE tournament_id = ? AND user_id = ? LIMIT 1", (tournament_id, user_id)) is not None
