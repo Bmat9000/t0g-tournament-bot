@@ -193,3 +193,8 @@ async def safe_edit_message(
     edited = await _retry_http(_do_edit, tries=5, base_sleep=0.6, allow_not_found=True)
     await _sleep_with_jitter(spacing, jitter=0.1)
     return edited
+
+
+async def setup(bot):
+    """discord.py extension entrypoint (no-op)."""
+    return

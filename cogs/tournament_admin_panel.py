@@ -7,7 +7,6 @@ from discord.ui import Modal, TextInput
 from discord.ext import commands  # needed for setup()
 
 from .tournament_db import get_tournament, upsert_tournament, delete_tournament
-from .tournament_db import DB_PATH  # optional, mainly for logging if you want it
 
 # We only import the refresh helper (no circular import, join_panel_cog does not import this file)
 try:

@@ -5953,3 +5953,698 @@ discord.errors.NotFound: 404 Not Found (error code: 10062): Unknown interaction
 [2025-12-04 15:49:20,651] [INFO] cogs.tournament_admin_panel: Guild 1434159976623898715: Created/updated tournament '1'
 [2025-12-04 15:49:40,674] [INFO] cogs.tournament_admin_panel: Deleting Tournament Teams category '🛡 Tournament Teams' (1446257109099348060)
 [2025-12-04 15:49:42,567] [INFO] cogs.tournament_admin_panel: Guild 1434159976623898715: Tournament deleted by lightcarrot1212
+[2025-12-24 23:07:17,454] [INFO] T0G_Tournament_Bot: Bot instance created.
+[2025-12-24 23:07:29,263] [INFO] T0G_Tournament_Bot: Running setup_hook...
+[2025-12-24 23:07:29,266] [INFO] T0G_Tournament_Bot: Searching for cogs in /mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs ...
+[2025-12-24 23:07:29,268] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.discord_safe - Extension 'cogs.discord_safe' has no 'setup' function.
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 968, in _load_from_module_spec
+    setup = getattr(lib, 'setup')
+            ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'cogs.discord_safe' has no attribute 'setup'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 971, in _load_from_module_spec
+    raise errors.NoEntryPointError(key)
+discord.ext.commands.errors.NoEntryPointError: Extension 'cogs.discord_safe' has no 'setup' function.
+[2025-12-24 23:07:29,272] [INFO] cogs.join_panel_cog: JoinPanelCog loaded.
+[2025-12-24 23:07:29,274] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.join_panel_cog
+[2025-12-24 23:07:29,277] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_captain_scoring_cog - Extension 'cogs.t_captain_scoring_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_captain_scoring_cog.py", line 7, in <module>
+    from .tournament_db import get_tournament, upsert_tournament
+ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_captain_scoring_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,280] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_close_join_cog - Extension 'cogs.t_close_join_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_close_join_cog.py", line 7, in <module>
+    from .tournament_db import get_tournament, upsert_tournament
+ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_close_join_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,283] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_delete_tournament_cog - Extension 'cogs.t_delete_tournament_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_delete_tournament_cog.py", line 8, in <module>
+    from .tournament_admin_panel import DeleteTournamentModal
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_admin_panel.py", line 9, in <module>
+    from .tournament_db import get_tournament, upsert_tournament, delete_tournament
+ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_delete_tournament_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,294] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_edit_settings_cog - Extension 'cogs.t_edit_settings_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_edit_settings_cog.py", line 8, in <module>
+    from .tournament_admin_panel import EditTournamentModal
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_admin_panel.py", line 9, in <module>
+    from .tournament_db import get_tournament, upsert_tournament, delete_tournament
+ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_edit_settings_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,297] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_open_join_cog - Extension 'cogs.t_open_join_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_open_join_cog.py", line 7, in <module>
+    from .tournament_db import get_tournament, upsert_tournament
+ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_open_join_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,300] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_screenshot_proof_cog - Extension 'cogs.t_screenshot_proof_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_screenshot_proof_cog.py", line 7, in <module>
+    from .tournament_db import get_tournament, upsert_tournament
+ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_screenshot_proof_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,303] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_start_bracket_cog - Extension 'cogs.t_start_bracket_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_start_bracket_cog.py", line 14, in <module>
+    from .tournament_db import (
+ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_start_bracket_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,306] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_toggle_bracket_cog - Extension 'cogs.t_toggle_bracket_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_toggle_bracket_cog.py", line 7, in <module>
+    from .tournament_db import get_tournament, upsert_tournament
+ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_toggle_bracket_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,311] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.test_bots_cog
+[2025-12-24 23:07:29,313] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_admin_panel - Extension 'cogs.tournament_admin_panel' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_admin_panel.py", line 9, in <module>
+    from .tournament_db import get_tournament, upsert_tournament, delete_tournament
+ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.tournament_admin_panel' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,316] [INFO] cogs.tournament_announcements_cog: tournament_announcements_cog loaded.
+[2025-12-24 23:07:29,317] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_announcements_cog
+[2025-12-24 23:07:29,420] [INFO] cogs.tournament_bracket_cog: tournament_bracket_cog module loaded (bracket helpers + image).
+[2025-12-24 23:07:29,421] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_bracket_cog
+[2025-12-24 23:07:29,423] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_cog - Extension 'cogs.tournament_cog' raised an error: ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_cog.py", line 8, in <module>
+    from .tournament_db import init_db, DB_PATH
+ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.tournament_cog' raised an error: ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,425] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_create_team_cog - Extension 'cogs.tournament_create_team_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_create_team_cog.py", line 11, in <module>
+    from .tournament_db import (
+ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.tournament_create_team_cog' raised an error: ImportError: cannot import name 'upsert_tournament' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:07:29,428] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_db - Extension 'cogs.tournament_db' has no 'setup' function.
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 968, in _load_from_module_spec
+    setup = getattr(lib, 'setup')
+            ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'cogs.tournament_db' has no attribute 'setup'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 971, in _load_from_module_spec
+    raise errors.NoEntryPointError(key)
+discord.ext.commands.errors.NoEntryPointError: Extension 'cogs.tournament_db' has no 'setup' function.
+[2025-12-24 23:07:29,429] [INFO] cogs.tournament_results_cog: tournament_results_cog loaded.
+[2025-12-24 23:07:29,430] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_results_cog
+[2025-12-24 23:07:29,432] [INFO] cogs.tournament_rules_cog: tournament_rules_cog loaded.
+[2025-12-24 23:07:29,433] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_rules_cog
+[2025-12-24 23:07:29,434] [INFO] cogs.tournament_teams_cog: tournament_teams_cog loaded.
+[2025-12-24 23:07:29,435] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_teams_cog
+[2025-12-24 23:07:29,436] [INFO] T0G_Tournament_Bot: Syncing application (slash) commands globally...
+[2025-12-24 23:07:29,437] [ERROR] T0G_Tournament_Bot: Error while syncing application commands: Client does not have an application_id set. Either the function was called before on_ready was called or application_id was not passed to the Client constructor.
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 65, in setup_hook
+    synced = await self.tree.sync()
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/app_commands/tree.py", line 1104, in sync
+    raise MissingApplicationID
+discord.errors.MissingApplicationID: Client does not have an application_id set. Either the function was called before on_ready was called or application_id was not passed to the Client constructor.
+[2025-12-24 23:07:29,439] [INFO] T0G_Tournament_Bot: setup_hook finished.
+[2025-12-24 23:08:35,372] [INFO] T0G_Tournament_Bot: Bot instance created.
+[2025-12-24 23:08:35,373] [INFO] T0G_Tournament_Bot: Running setup_hook...
+[2025-12-24 23:08:35,374] [INFO] T0G_Tournament_Bot: Searching for cogs in /mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs ...
+[2025-12-24 23:08:35,376] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.discord_safe - Extension 'cogs.discord_safe' has no 'setup' function.
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 968, in _load_from_module_spec
+    setup = getattr(lib, 'setup')
+            ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'cogs.discord_safe' has no attribute 'setup'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 971, in _load_from_module_spec
+    raise errors.NoEntryPointError(key)
+discord.ext.commands.errors.NoEntryPointError: Extension 'cogs.discord_safe' has no 'setup' function.
+[2025-12-24 23:08:35,378] [INFO] cogs.join_panel_cog: JoinPanelCog loaded.
+[2025-12-24 23:08:35,379] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.join_panel_cog
+[2025-12-24 23:08:35,382] [INFO] cogs.t_captain_scoring_cog: TournamentCaptainScoringCog loaded.
+[2025-12-24 23:08:35,383] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_captain_scoring_cog
+[2025-12-24 23:08:35,385] [INFO] cogs.t_close_join_cog: TournamentCloseJoinCog loaded.
+[2025-12-24 23:08:35,387] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_close_join_cog
+[2025-12-24 23:08:35,388] [INFO] cogs.t_delete_tournament_cog: TournamentDeleteTournamentCog loaded.
+[2025-12-24 23:08:35,389] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_delete_tournament_cog
+[2025-12-24 23:08:35,391] [INFO] cogs.t_edit_settings_cog: TournamentEditSettingsCog loaded.
+[2025-12-24 23:08:35,393] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_edit_settings_cog
+[2025-12-24 23:08:35,394] [INFO] cogs.t_open_join_cog: TournamentOpenJoinCog loaded.
+[2025-12-24 23:08:35,395] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_open_join_cog
+[2025-12-24 23:08:35,396] [INFO] cogs.t_screenshot_proof_cog: TournamentScreenshotProofCog loaded.
+[2025-12-24 23:08:35,397] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_screenshot_proof_cog
+[2025-12-24 23:08:35,399] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_start_bracket_cog - Extension 'cogs.t_start_bracket_cog' raised an error: ImportError: cannot import name 'get_ready_teams' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_start_bracket_cog.py", line 14, in <module>
+    from .tournament_db import (
+ImportError: cannot import name 'get_ready_teams' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_start_bracket_cog' raised an error: ImportError: cannot import name 'get_ready_teams' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:08:35,402] [INFO] cogs.t_toggle_bracket_cog: TournamentToggleBracketCog loaded.
+[2025-12-24 23:08:35,403] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_toggle_bracket_cog
+[2025-12-24 23:08:35,406] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.test_bots_cog
+[2025-12-24 23:08:35,407] [INFO] cogs.tournament_admin_panel: tournament_admin_panel module loaded (panel helpers & modals only).
+[2025-12-24 23:08:35,408] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_admin_panel
+[2025-12-24 23:08:35,410] [INFO] cogs.tournament_announcements_cog: tournament_announcements_cog loaded.
+[2025-12-24 23:08:35,411] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_announcements_cog
+[2025-12-24 23:08:35,412] [INFO] cogs.tournament_bracket_cog: tournament_bracket_cog module loaded (bracket helpers + image).
+[2025-12-24 23:08:35,413] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_bracket_cog
+[2025-12-24 23:08:35,414] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_cog - Extension 'cogs.tournament_cog' raised an error: ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_cog.py", line 8, in <module>
+    from .tournament_db import init_db, DB_PATH
+ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.tournament_cog' raised an error: ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:08:35,417] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_create_team_cog - Extension 'cogs.tournament_create_team_cog' raised an error: ImportError: cannot import name 'add_team' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_create_team_cog.py", line 11, in <module>
+    from .tournament_db import (
+ImportError: cannot import name 'add_team' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.tournament_create_team_cog' raised an error: ImportError: cannot import name 'add_team' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:08:35,419] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_db - Extension 'cogs.tournament_db' has no 'setup' function.
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 968, in _load_from_module_spec
+    setup = getattr(lib, 'setup')
+            ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'cogs.tournament_db' has no attribute 'setup'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 971, in _load_from_module_spec
+    raise errors.NoEntryPointError(key)
+discord.ext.commands.errors.NoEntryPointError: Extension 'cogs.tournament_db' has no 'setup' function.
+[2025-12-24 23:08:35,421] [INFO] cogs.tournament_results_cog: tournament_results_cog loaded.
+[2025-12-24 23:08:35,421] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_results_cog
+[2025-12-24 23:08:35,423] [INFO] cogs.tournament_rules_cog: tournament_rules_cog loaded.
+[2025-12-24 23:08:35,424] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_rules_cog
+[2025-12-24 23:08:35,425] [INFO] cogs.tournament_teams_cog: tournament_teams_cog loaded.
+[2025-12-24 23:08:35,426] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_teams_cog
+[2025-12-24 23:08:35,427] [INFO] T0G_Tournament_Bot: Syncing application (slash) commands globally...
+[2025-12-24 23:08:35,428] [ERROR] T0G_Tournament_Bot: Error while syncing application commands: Client does not have an application_id set. Either the function was called before on_ready was called or application_id was not passed to the Client constructor.
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 65, in setup_hook
+    synced = await self.tree.sync()
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/app_commands/tree.py", line 1104, in sync
+    raise MissingApplicationID
+discord.errors.MissingApplicationID: Client does not have an application_id set. Either the function was called before on_ready was called or application_id was not passed to the Client constructor.
+[2025-12-24 23:08:35,430] [INFO] T0G_Tournament_Bot: setup_hook finished.
+[2025-12-24 23:09:02,869] [INFO] T0G_Tournament_Bot: Bot instance created.
+[2025-12-24 23:09:02,871] [INFO] T0G_Tournament_Bot: Running setup_hook...
+[2025-12-24 23:09:02,872] [INFO] T0G_Tournament_Bot: Searching for cogs in /mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs ...
+[2025-12-24 23:09:02,874] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.discord_safe - Extension 'cogs.discord_safe' raised an error: TypeError: object NoneType can't be used in 'await' expression
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 974, in _load_from_module_spec
+    await setup(self)
+TypeError: object NoneType can't be used in 'await' expression
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 979, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.discord_safe' raised an error: TypeError: object NoneType can't be used in 'await' expression
+[2025-12-24 23:09:02,877] [INFO] cogs.join_panel_cog: JoinPanelCog loaded.
+[2025-12-24 23:09:02,878] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.join_panel_cog
+[2025-12-24 23:09:02,881] [INFO] cogs.t_captain_scoring_cog: TournamentCaptainScoringCog loaded.
+[2025-12-24 23:09:02,882] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_captain_scoring_cog
+[2025-12-24 23:09:02,883] [INFO] cogs.t_close_join_cog: TournamentCloseJoinCog loaded.
+[2025-12-24 23:09:02,884] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_close_join_cog
+[2025-12-24 23:09:02,886] [INFO] cogs.t_delete_tournament_cog: TournamentDeleteTournamentCog loaded.
+[2025-12-24 23:09:02,887] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_delete_tournament_cog
+[2025-12-24 23:09:02,888] [INFO] cogs.t_edit_settings_cog: TournamentEditSettingsCog loaded.
+[2025-12-24 23:09:02,889] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_edit_settings_cog
+[2025-12-24 23:09:02,890] [INFO] cogs.t_open_join_cog: TournamentOpenJoinCog loaded.
+[2025-12-24 23:09:02,891] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_open_join_cog
+[2025-12-24 23:09:02,892] [INFO] cogs.t_screenshot_proof_cog: TournamentScreenshotProofCog loaded.
+[2025-12-24 23:09:02,893] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_screenshot_proof_cog
+[2025-12-24 23:09:02,895] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_start_bracket_cog - Extension 'cogs.t_start_bracket_cog' raised an error: ImportError: cannot import name 'get_ready_teams' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_start_bracket_cog.py", line 14, in <module>
+    from .tournament_db import (
+ImportError: cannot import name 'get_ready_teams' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_start_bracket_cog' raised an error: ImportError: cannot import name 'get_ready_teams' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:09:02,898] [INFO] cogs.t_toggle_bracket_cog: TournamentToggleBracketCog loaded.
+[2025-12-24 23:09:02,898] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_toggle_bracket_cog
+[2025-12-24 23:09:02,901] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.test_bots_cog
+[2025-12-24 23:09:02,903] [INFO] cogs.tournament_admin_panel: tournament_admin_panel module loaded (panel helpers & modals only).
+[2025-12-24 23:09:02,904] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_admin_panel
+[2025-12-24 23:09:02,905] [INFO] cogs.tournament_announcements_cog: tournament_announcements_cog loaded.
+[2025-12-24 23:09:02,906] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_announcements_cog
+[2025-12-24 23:09:02,907] [INFO] cogs.tournament_bracket_cog: tournament_bracket_cog module loaded (bracket helpers + image).
+[2025-12-24 23:09:02,908] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_bracket_cog
+[2025-12-24 23:09:02,909] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_cog - Extension 'cogs.tournament_cog' raised an error: ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_cog.py", line 8, in <module>
+    from .tournament_db import init_db, DB_PATH
+ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.tournament_cog' raised an error: ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:09:02,911] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_create_team_cog - Extension 'cogs.tournament_create_team_cog' raised an error: ImportError: cannot import name 'add_team' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_create_team_cog.py", line 11, in <module>
+    from .tournament_db import (
+ImportError: cannot import name 'add_team' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.tournament_create_team_cog' raised an error: ImportError: cannot import name 'add_team' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:09:02,913] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_db - Extension 'cogs.tournament_db' has no 'setup' function.
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 968, in _load_from_module_spec
+    setup = getattr(lib, 'setup')
+            ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'cogs.tournament_db' has no attribute 'setup'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 971, in _load_from_module_spec
+    raise errors.NoEntryPointError(key)
+discord.ext.commands.errors.NoEntryPointError: Extension 'cogs.tournament_db' has no 'setup' function.
+[2025-12-24 23:09:02,915] [INFO] cogs.tournament_results_cog: tournament_results_cog loaded.
+[2025-12-24 23:09:02,916] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_results_cog
+[2025-12-24 23:09:02,917] [INFO] cogs.tournament_rules_cog: tournament_rules_cog loaded.
+[2025-12-24 23:09:02,918] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_rules_cog
+[2025-12-24 23:09:02,919] [INFO] cogs.tournament_teams_cog: tournament_teams_cog loaded.
+[2025-12-24 23:09:02,920] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_teams_cog
+[2025-12-24 23:09:02,921] [INFO] T0G_Tournament_Bot: Syncing application (slash) commands globally...
+[2025-12-24 23:09:02,922] [ERROR] T0G_Tournament_Bot: Error while syncing application commands: Client does not have an application_id set. Either the function was called before on_ready was called or application_id was not passed to the Client constructor.
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 65, in setup_hook
+    synced = await self.tree.sync()
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/app_commands/tree.py", line 1104, in sync
+    raise MissingApplicationID
+discord.errors.MissingApplicationID: Client does not have an application_id set. Either the function was called before on_ready was called or application_id was not passed to the Client constructor.
+[2025-12-24 23:09:02,923] [INFO] T0G_Tournament_Bot: setup_hook finished.
+[2025-12-24 23:09:21,214] [INFO] T0G_Tournament_Bot: Bot instance created.
+[2025-12-24 23:09:21,216] [INFO] T0G_Tournament_Bot: Running setup_hook...
+[2025-12-24 23:09:21,217] [INFO] T0G_Tournament_Bot: Searching for cogs in /mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs ...
+[2025-12-24 23:09:21,219] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.discord_safe
+[2025-12-24 23:09:21,221] [INFO] cogs.join_panel_cog: JoinPanelCog loaded.
+[2025-12-24 23:09:21,222] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.join_panel_cog
+[2025-12-24 23:09:21,291] [INFO] cogs.t_captain_scoring_cog: TournamentCaptainScoringCog loaded.
+[2025-12-24 23:09:21,292] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_captain_scoring_cog
+[2025-12-24 23:09:21,294] [INFO] cogs.t_close_join_cog: TournamentCloseJoinCog loaded.
+[2025-12-24 23:09:21,295] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_close_join_cog
+[2025-12-24 23:09:21,296] [INFO] cogs.t_delete_tournament_cog: TournamentDeleteTournamentCog loaded.
+[2025-12-24 23:09:21,297] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_delete_tournament_cog
+[2025-12-24 23:09:21,298] [INFO] cogs.t_edit_settings_cog: TournamentEditSettingsCog loaded.
+[2025-12-24 23:09:21,299] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_edit_settings_cog
+[2025-12-24 23:09:21,300] [INFO] cogs.t_open_join_cog: TournamentOpenJoinCog loaded.
+[2025-12-24 23:09:21,301] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_open_join_cog
+[2025-12-24 23:09:21,302] [INFO] cogs.t_screenshot_proof_cog: TournamentScreenshotProofCog loaded.
+[2025-12-24 23:09:21,303] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_screenshot_proof_cog
+[2025-12-24 23:09:21,305] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.t_start_bracket_cog - Extension 'cogs.t_start_bracket_cog' raised an error: ImportError: cannot import name 'get_ready_teams' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/t_start_bracket_cog.py", line 14, in <module>
+    from .tournament_db import (
+ImportError: cannot import name 'get_ready_teams' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.t_start_bracket_cog' raised an error: ImportError: cannot import name 'get_ready_teams' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:09:21,307] [INFO] cogs.t_toggle_bracket_cog: TournamentToggleBracketCog loaded.
+[2025-12-24 23:09:21,307] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_toggle_bracket_cog
+[2025-12-24 23:09:21,310] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.test_bots_cog
+[2025-12-24 23:09:21,311] [INFO] cogs.tournament_admin_panel: tournament_admin_panel module loaded (panel helpers & modals only).
+[2025-12-24 23:09:21,312] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_admin_panel
+[2025-12-24 23:09:21,313] [INFO] cogs.tournament_announcements_cog: tournament_announcements_cog loaded.
+[2025-12-24 23:09:21,314] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_announcements_cog
+[2025-12-24 23:09:21,315] [INFO] cogs.tournament_bracket_cog: tournament_bracket_cog module loaded (bracket helpers + image).
+[2025-12-24 23:09:21,316] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_bracket_cog
+[2025-12-24 23:09:21,317] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_cog - Extension 'cogs.tournament_cog' raised an error: ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_cog.py", line 8, in <module>
+    from .tournament_db import init_db, DB_PATH
+ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.tournament_cog' raised an error: ImportError: cannot import name 'DB_PATH' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:09:21,319] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_create_team_cog - Extension 'cogs.tournament_create_team_cog' raised an error: ImportError: cannot import name 'add_team' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 962, in _load_from_module_spec
+    spec.loader.exec_module(lib)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_create_team_cog.py", line 11, in <module>
+    from .tournament_db import (
+ImportError: cannot import name 'add_team' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 965, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.tournament_create_team_cog' raised an error: ImportError: cannot import name 'add_team' from 'cogs.tournament_db' (/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/cogs/tournament_db.py)
+[2025-12-24 23:09:21,321] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_db - Extension 'cogs.tournament_db' has no 'setup' function.
+Traceback (most recent call last):
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 968, in _load_from_module_spec
+    setup = getattr(lib, 'setup')
+            ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'cogs.tournament_db' has no attribute 'setup'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 57, in setup_hook
+    await self.load_extension(ext_name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 1040, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/ext/commands/bot.py", line 971, in _load_from_module_spec
+    raise errors.NoEntryPointError(key)
+discord.ext.commands.errors.NoEntryPointError: Extension 'cogs.tournament_db' has no 'setup' function.
+[2025-12-24 23:09:21,322] [INFO] cogs.tournament_results_cog: tournament_results_cog loaded.
+[2025-12-24 23:09:21,323] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_results_cog
+[2025-12-24 23:09:21,324] [INFO] cogs.tournament_rules_cog: tournament_rules_cog loaded.
+[2025-12-24 23:09:21,325] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_rules_cog
+[2025-12-24 23:09:21,326] [INFO] cogs.tournament_teams_cog: tournament_teams_cog loaded.
+[2025-12-24 23:09:21,326] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_teams_cog
+[2025-12-24 23:09:21,327] [INFO] T0G_Tournament_Bot: Syncing application (slash) commands globally...
+[2025-12-24 23:09:21,328] [ERROR] T0G_Tournament_Bot: Error while syncing application commands: Client does not have an application_id set. Either the function was called before on_ready was called or application_id was not passed to the Client constructor.
+Traceback (most recent call last):
+  File "/mnt/data/t0g_tourney_check/t0g-tournament-bot-main/main.py", line 65, in setup_hook
+    synced = await self.tree.sync()
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/pyvenv/lib/python3.11/site-packages/discord/app_commands/tree.py", line 1104, in sync
+    raise MissingApplicationID
+discord.errors.MissingApplicationID: Client does not have an application_id set. Either the function was called before on_ready was called or application_id was not passed to the Client constructor.
+[2025-12-24 23:09:21,329] [INFO] T0G_Tournament_Bot: setup_hook finished.

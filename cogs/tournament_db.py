@@ -308,6 +308,56 @@ def update_tournament_channels(conn: sqlite3.Connection, tournament_id: int, **c
 
 
 @with_conn
+
+
+def upsert_tournament(guild_id: int, data: Dict[str, Any]) -> int:
+    """Compatibility wrapper for older cogs.
+
+    If an active tournament exists for this guild, update its core settings.
+    Otherwise create a new tournament.
+
+    Returns the tournament_id.
+    """
+    from core.db import get_db_connection, run_db  # local import to avoid cycles
+
+    name = str(data.get("name") or "Tournament").strip() or "Tournament"
+    max_teams = int(data.get("max_teams") or 8)
+    best_of = int(data.get("best_of") or 3)
+    team_size = int(data.get("team_size") or 2)
+
+    with get_db_connection() as conn:
+        def _op(c):
+            t = get_tournament(c, guild_id)
+            if not t:
+                return create_tournament(
+                    c,
+                    guild_id=guild_id,
+                    name=name,
+                    max_teams=max_teams,
+                    best_of=best_of,
+                    team_size=team_size,
+                    join_open=True,
+                    open_join_mode=True,
+                )
+
+            now = _now()
+            c.execute(
+                """
+                UPDATE tournaments
+                   SET name = ?,
+                       max_teams = ?,
+                       best_of = ?,
+                       team_size = ?,
+                       updated_at = ?
+                 WHERE tournament_id = ?
+                """,
+                (name, max_teams, best_of, team_size, now, int(t["tournament_id"])),
+            )
+            return int(t["tournament_id"])
+
+        return run_db(conn, _op)
+
+
 def delete_tournament(conn: sqlite3.Connection, tournament_id: int) -> None:
     """
     DB-side delete. Discord channel/role deletes are in your bot code.
