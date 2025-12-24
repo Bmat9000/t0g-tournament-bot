@@ -1,15 +1,21 @@
-# main.py
-import os
+"""Bot entrypoint.
+
+Cleanup Roadmap v1: Centralize config & paths (no behavior changes).
+
+- Loads .env exactly once via core.config
+- Uses ROOT-based paths for consistency
+"""
+
 import logging
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
 
-from dotenv import load_dotenv
+from core.config import ROOT, env  # loads .env once
 import discord
 from discord.ext import commands
 
 # ---------- Logging Setup ----------
-LOG_DIR = Path("logs")
+LOG_DIR = ROOT / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 LOG_FILE = LOG_DIR / "bot.log"
 
@@ -43,8 +49,7 @@ discord_logger.setLevel(logging.INFO)
 log = logging.getLogger("T0G_Tournament_Bot")
 
 # ---------- Env & Token ----------
-load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
+TOKEN = env("DISCORD_TOKEN")
 if not TOKEN:
     log.critical("DISCORD_TOKEN not found in .env file – cannot start bot.")
     raise RuntimeError("DISCORD_TOKEN not found in .env file")
@@ -55,7 +60,7 @@ intents.members = True      # we'll need member info for teams later
 intents.guilds = True
 
 # ---------- Paths ----------
-COGS_DIR = Path("cogs")
+COGS_DIR = ROOT / "cogs"
 
 
 # ---------- Bot Class ----------

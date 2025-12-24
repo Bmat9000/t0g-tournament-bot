@@ -17,18 +17,14 @@ from __future__ import annotations
 import random
 import sqlite3
 import time
-from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TypeVar
 
 T = TypeVar("T")
 
 # -----------------------------
-# Paths
+# Paths (centralized)
 # -----------------------------
-ROOT = Path(__file__).resolve().parent
-DATA_DIR = ROOT / "data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-DB_PATH = DATA_DIR / "tournaments.db"
+from core.config import DB_PATH  # single source of truth for DB location
 
 
 def _now() -> int:

@@ -1,7 +1,6 @@
 # cogs/join_panel_cog.py
 import logging
 import sqlite3
-from pathlib import Path
 from typing import Optional, Dict, Any
 
 import discord
@@ -11,10 +10,8 @@ from discord.ui import View, button
 
 log = logging.getLogger(__name__)
 
-ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT / "data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-DB_PATH = DATA_DIR / "tournaments.db"
+# Centralized paths / .env loader
+from core.config import DB_PATH
 
 
 # ---------- Small DB Helpers ----------
