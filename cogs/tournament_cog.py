@@ -5,7 +5,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from .tournament_db import init_db, DB_PATH
+from .tournament_db import init_db
+from core.config import DB_PATH
 from .tournament_admin_panel import CreateTournamentModal
 
 log = logging.getLogger(__name__)

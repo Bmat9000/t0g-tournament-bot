@@ -47,9 +47,14 @@ class T0GTournamentBot(commands.Bot):
         else:
             log.info("Searching for cogs in %s ...", COGS_DIR.resolve())
 
-        # Auto-discover and load all .py files directly inside /cogs
+        # Auto-discover and load cogs inside /cogs
+        # We only load actual extensions (cogs) to avoid loading helper modules.
+        # Convention: files ending with *_cog.py, plus a small allowlist.
+        allow = {"discord_safe.py", "tournament_admin_panel.py"}
         for path in COGS_DIR.glob("*.py"):
             if path.name.startswith("_"):
+                continue
+            if (not path.name.endswith("_cog.py")) and (path.name not in allow):
                 continue
 
             ext_name = f"cogs.{path.stem}"

@@ -14,6 +14,9 @@ from typing import Any, Dict, Optional
 
 import sqlite3
 
+from core.config import DB_PATH  # re-export for legacy imports
+from core import db as core_db
+
 from core.db import get_db_connection, run_db, with_conn
 
 
@@ -793,3 +796,53 @@ def is_user_in_tournament(conn: sqlite3.Connection, tournament_id: int, user_id:
 @with_conn
 def is_user_in_team(conn: sqlite3.Connection, tournament_id: int, user_id: int) -> bool:
     return _fetchone(conn, "SELECT 1 FROM team_members WHERE tournament_id = ? AND user_id = ? LIMIT 1", (tournament_id, user_id)) is not None
+
+# ---------- Compatibility helpers (legacy API) ----------
+def get_db_connection() -> sqlite3.Connection:
+    """Legacy helper kept for older cogs. Prefer core.db.get_db_connection."""
+    return core_db.get_db_connection()
+def get_ready_teams(guild_id: int):
+    """Legacy alias for list_ready_teams."""
+    return list_ready_teams(guild_id)
+def update_bracket_match(
+    guild_id: int,
+    match_id: int,
+    *,
+    winner: int | None = None,
+    status: str | None = None,
+    score_a: int | None = None,
+    score_b: int | None = None,
+    match_channel_id: int | None = None,
+) -> None:
+    """Legacy updater used by older bracket cogs."""
+    fields = []
+    params: list[Any] = []
+
+    if winner is not None:
+        fields.append("winner_team_id = ?")
+        params.append(winner)
+    if status is not None:
+        fields.append("status = ?")
+        params.append(status.lower() if isinstance(status, str) else status)
+    if score_a is not None:
+        fields.append("score_a = ?")
+        params.append(score_a)
+    if score_b is not None:
+        fields.append("score_b = ?")
+        params.append(score_b)
+    if match_channel_id is not None:
+        fields.append("match_channel_id = ?")
+        params.append(match_channel_id)
+
+    if not fields:
+        return
+
+    fields.append("updated_at = ?")
+    params.append(_now())
+    params.extend([guild_id, match_id])
+
+    sql = f"UPDATE bracket_matches SET {', '.join(fields)} WHERE tournament_id = ? AND match_id = ?"
+    core_db.run_db(sql, tuple(params))
+async def setup(bot):
+    """Allow this module to be safely loaded as an extension by the auto-loader."""
+    return
