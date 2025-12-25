@@ -13,6 +13,7 @@ import time
 from typing import Any, Dict, Optional
 
 import sqlite3
+import shutil
 
 from core.config import DB_PATH  # re-export for legacy imports
 from core import db as core_db
@@ -166,6 +167,12 @@ ON action_log(guild_id, created_at);
 @with_conn
 def init_db(conn: sqlite3.Connection) -> None:
     """Initialize DB schema and run lightweight migrations (no behavior change)."""
+
+    # This project has evolved through multiple schema revisions. If a user already
+    # has an older `data/tournaments.db`, SQLite can raise schema errors (missing
+    # columns/tables referenced by newer indexes). We try a small migration for
+    # common columns; if the DB is too old to migrate safely, we automatically
+    # back it up and recreate a fresh DB (keeps the bot runnable).
     def _table_exists(table: str) -> bool:
         row = conn.execute(
             "SELECT 1 FROM sqlite_master WHERE type='table' AND name=? LIMIT 1;",
@@ -182,25 +189,54 @@ def init_db(conn: sqlite3.Connection) -> None:
         if column not in cols:
             conn.execute(ddl)
 
-    def _write():
-        try:
-            conn.executescript(SCHEMA_SQL)
-        except sqlite3.OperationalError as e:
-            # Handle older DBs missing newer columns referenced by indexes/triggers.
-            msg = str(e).lower()
-            if "no such column: updated_at" in msg:
-                now = _now()
-                # Add updated_at columns with a safe default to satisfy NOT NULL
-                _ensure_column("tournaments", "updated_at", f"ALTER TABLE tournaments ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
-                _ensure_column("participants", "updated_at", f"ALTER TABLE participants ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
-                _ensure_column("teams", "updated_at", f"ALTER TABLE teams ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
-                _ensure_column("bracket_matches", "updated_at", f"ALTER TABLE bracket_matches ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
-                # Retry full schema script (indexes will now succeed).
-                conn.executescript(SCHEMA_SQL)
-            else:
-                raise
+    # NOTE: init_db is called inside a connection wrapper (with_conn). We must
+    # run schema + migrations on THIS SAME connection, otherwise checks like
+    # PRAGMA table_info() can read a different DB state than the one we wrote.
+    try:
+        conn.executescript(SCHEMA_SQL)
+        return
+    except sqlite3.OperationalError as e:
+        msg = str(e).lower()
 
-    run_db(_write)
+    # 1) Light migrations for common "missing column" errors
+    if "no such column: updated_at" in msg:
+        now = _now()
+        _ensure_column("tournaments", "updated_at", f"ALTER TABLE tournaments ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
+        _ensure_column("participants", "updated_at", f"ALTER TABLE participants ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
+        _ensure_column("teams", "updated_at", f"ALTER TABLE teams ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
+        _ensure_column("bracket_matches", "updated_at", f"ALTER TABLE bracket_matches ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
+        conn.executescript(SCHEMA_SQL)
+        return
+
+    # 2) If the DB is too old / different (missing columns like tournament_id/ready, or missing tables)
+    # back it up and rebuild a fresh DB.
+    if "no such column:" in msg or "no such table:" in msg:
+        ts = _now()
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+        if DB_PATH.exists():
+            backup = DB_PATH.with_name(f"{DB_PATH.stem}.bak_{ts}{DB_PATH.suffix}")
+            try:
+                DB_PATH.rename(backup)
+            except Exception:
+                shutil.copy2(DB_PATH, backup)
+                try:
+                    DB_PATH.unlink()
+                except Exception:
+                    pass
+
+        conn2 = core_db.get_db_connection()
+        try:
+            conn2.executescript(SCHEMA_SQL)
+        finally:
+            conn2.close()
+        return
+
+    # Anything else: bubble up
+    raise
 
 
 # -----------------------------
