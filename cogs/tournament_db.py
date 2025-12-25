@@ -165,9 +165,30 @@ ON action_log(guild_id, created_at);
 
 @with_conn
 def init_db(conn: sqlite3.Connection) -> None:
-    # schema creation is a write, so wrap in retry
+    """Initialize DB schema and run lightweight migrations (no behavior change)."""
+    def _ensure_column(table: str, column: str, ddl: str) -> None:
+        cols = [r[1] for r in conn.execute(f"PRAGMA table_info({table})").fetchall()]
+        if column not in cols:
+            conn.execute(ddl)
+
     def _write():
-        conn.executescript(SCHEMA_SQL)
+        try:
+            conn.executescript(SCHEMA_SQL)
+        except sqlite3.OperationalError as e:
+            # Handle older DBs missing newer columns referenced by indexes/triggers.
+            msg = str(e).lower()
+            if "no such column: updated_at" in msg:
+                now = _now()
+                # Add updated_at columns with a safe default to satisfy NOT NULL
+                _ensure_column("tournaments", "updated_at", f"ALTER TABLE tournaments ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
+                _ensure_column("participants", "updated_at", f"ALTER TABLE participants ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
+                _ensure_column("teams", "updated_at", f"ALTER TABLE teams ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
+                _ensure_column("bracket_matches", "updated_at", f"ALTER TABLE bracket_matches ADD COLUMN updated_at INTEGER NOT NULL DEFAULT {now}")
+                # Retry full schema script (indexes will now succeed).
+                conn.executescript(SCHEMA_SQL)
+            else:
+                raise
+
     run_db(_write)
 
 
@@ -479,6 +500,25 @@ def user_team_id(conn: sqlite3.Connection, tournament_id: int, user_id: int) -> 
 
 
 @with_conn
+
+@with_conn
+def add_team(
+    conn: sqlite3.Connection,
+    guild_id: int,
+    name: str,
+    role_id: int,
+    captain_user_id: int,
+    is_bot_team: bool = False,
+) -> int:
+    """Legacy helper used by older cogs: create a team for the active tournament."""
+    t = get_tournament(conn, guild_id)
+    if not t:
+        raise ValueError("No active tournament for this guild.")
+    team_id = create_team(conn, int(t["tournament_id"]), guild_id, name, captain_user_id, bool(is_bot_team))
+    # ensure role_id saved (create_team sets it via UPDATE in some flows, but keep safe)
+    conn.execute("UPDATE teams SET role_id = ?, updated_at = ? WHERE team_id = ?", (int(role_id), _now(), int(team_id)))
+    conn.commit()
+    return int(team_id)
 def create_team(
     conn: sqlite3.Connection,
     tournament_id: int,
