@@ -6648,3 +6648,87 @@ Traceback (most recent call last):
     raise MissingApplicationID
 discord.errors.MissingApplicationID: Client does not have an application_id set. Either the function was called before on_ready was called or application_id was not passed to the Client constructor.
 [2025-12-24 23:09:21,329] [INFO] T0G_Tournament_Bot: setup_hook finished.
+[2025-12-25 03:01:13,676] [INFO] T0G_Tournament_Bot: Bot instance created.
+[2025-12-25 03:01:13,676] [INFO] T0G_Tournament_Bot: Starting T0G Tournament Bot...
+[2025-12-25 03:01:13,677] [WARNING] discord.ext.commands.bot: Privileged message content intent is missing, commands may not work as expected.
+[2025-12-25 03:01:13,677] [INFO] discord.client: logging in using static token
+[2025-12-25 03:01:14,443] [INFO] T0G_Tournament_Bot: Running setup_hook...
+[2025-12-25 03:01:14,443] [INFO] T0G_Tournament_Bot: Searching for cogs in C:\Users\bryce\OneDrive\Desktop\t0g-tournament-bot-main\cogs ...
+[2025-12-25 03:01:14,446] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.discord_safe
+[2025-12-25 03:01:14,453] [INFO] cogs.join_panel_cog: JoinPanelCog loaded.
+[2025-12-25 03:01:14,454] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.join_panel_cog
+[2025-12-25 03:01:14,462] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.test_bots_cog
+[2025-12-25 03:01:14,466] [INFO] cogs.tournament_admin_panel: tournament_admin_panel module loaded (panel helpers & modals only).
+[2025-12-25 03:01:14,466] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_admin_panel
+[2025-12-25 03:01:14,466] [INFO] cogs.tournament_announcements_cog: tournament_announcements_cog loaded.
+[2025-12-25 03:01:14,467] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_announcements_cog
+[2025-12-25 03:01:14,481] [INFO] cogs.tournament_bracket_cog: tournament_bracket_cog module loaded (bracket helpers + image).
+[2025-12-25 03:01:14,481] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_bracket_cog
+[2025-12-25 03:01:14,486] [ERROR] T0G_Tournament_Bot: ❌ Failed to load cog: cogs.tournament_cog - Extension 'cogs.tournament_cog' raised an error: OperationalError: no such column: tournament_id
+Traceback (most recent call last):
+  File "C:\Users\bryce\OneDrive\Desktop\t0g-tournament-bot-main\cogs\tournament_db.py", line 187, in _write
+    conn.executescript(SCHEMA_SQL)
+sqlite3.OperationalError: no such column: updated_at
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\bryce\AppData\Roaming\Python\Python312\site-packages\discord\ext\commands\bot.py", line 963, in _load_from_module_spec
+    await setup(self)
+  File "C:\Users\bryce\OneDrive\Desktop\t0g-tournament-bot-main\cogs\tournament_cog.py", line 58, in setup
+    await bot.add_cog(TournamentCog(bot))
+                      ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bryce\OneDrive\Desktop\t0g-tournament-bot-main\cogs\tournament_cog.py", line 18, in __init__
+    init_db()
+  File "C:\Users\bryce\OneDrive\Desktop\t0g-tournament-bot-main\core\db.py", line 72, in wrapper
+    return fn(conn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bryce\OneDrive\Desktop\t0g-tournament-bot-main\cogs\tournament_db.py", line 203, in init_db
+    run_db(_write)
+  File "C:\Users\bryce\OneDrive\Desktop\t0g-tournament-bot-main\core\db.py", line 35, in run_db
+    return fn()
+           ^^^^
+  File "C:\Users\bryce\OneDrive\Desktop\t0g-tournament-bot-main\cogs\tournament_db.py", line 199, in _write
+    conn.executescript(SCHEMA_SQL)
+sqlite3.OperationalError: no such column: tournament_id
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\bryce\OneDrive\Desktop\t0g-tournament-bot-main\main.py", line 62, in setup_hook
+    await self.load_extension(ext_name)
+  File "C:\Users\bryce\AppData\Roaming\Python\Python312\site-packages\discord\ext\commands\bot.py", line 1029, in load_extension
+    await self._load_from_module_spec(spec, name)
+  File "C:\Users\bryce\AppData\Roaming\Python\Python312\site-packages\discord\ext\commands\bot.py", line 968, in _load_from_module_spec
+    raise errors.ExtensionFailed(key, e) from e
+discord.ext.commands.errors.ExtensionFailed: Extension 'cogs.tournament_cog' raised an error: OperationalError: no such column: tournament_id
+[2025-12-25 03:01:14,492] [INFO] cogs.tournament_create_team_cog: tournament_create_team_cog loaded (create-team helpers).
+[2025-12-25 03:01:14,492] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_create_team_cog
+[2025-12-25 03:01:14,493] [INFO] cogs.tournament_results_cog: tournament_results_cog loaded.
+[2025-12-25 03:01:14,493] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_results_cog
+[2025-12-25 03:01:14,494] [INFO] cogs.tournament_rules_cog: tournament_rules_cog loaded.
+[2025-12-25 03:01:14,494] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_rules_cog
+[2025-12-25 03:01:14,494] [INFO] cogs.tournament_teams_cog: tournament_teams_cog loaded.
+[2025-12-25 03:01:14,495] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.tournament_teams_cog
+[2025-12-25 03:01:14,496] [INFO] cogs.t_captain_scoring_cog: TournamentCaptainScoringCog loaded.
+[2025-12-25 03:01:14,496] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_captain_scoring_cog
+[2025-12-25 03:01:14,497] [INFO] cogs.t_close_join_cog: TournamentCloseJoinCog loaded.
+[2025-12-25 03:01:14,497] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_close_join_cog
+[2025-12-25 03:01:14,498] [INFO] cogs.t_delete_tournament_cog: TournamentDeleteTournamentCog loaded.
+[2025-12-25 03:01:14,498] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_delete_tournament_cog
+[2025-12-25 03:01:14,499] [INFO] cogs.t_edit_settings_cog: TournamentEditSettingsCog loaded.
+[2025-12-25 03:01:14,500] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_edit_settings_cog
+[2025-12-25 03:01:14,501] [INFO] cogs.t_open_join_cog: TournamentOpenJoinCog loaded.
+[2025-12-25 03:01:14,501] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_open_join_cog
+[2025-12-25 03:01:14,502] [INFO] cogs.t_screenshot_proof_cog: TournamentScreenshotProofCog loaded.
+[2025-12-25 03:01:14,502] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_screenshot_proof_cog
+[2025-12-25 03:01:14,507] [INFO] cogs.t_start_bracket_cog: TournamentStartBracketCog loaded.
+[2025-12-25 03:01:14,507] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_start_bracket_cog
+[2025-12-25 03:01:14,508] [INFO] cogs.t_toggle_bracket_cog: TournamentToggleBracketCog loaded.
+[2025-12-25 03:01:14,508] [INFO] T0G_Tournament_Bot: ✅ Loaded cog: cogs.t_toggle_bracket_cog
+[2025-12-25 03:01:14,508] [INFO] T0G_Tournament_Bot: Syncing application (slash) commands globally...
+[2025-12-25 03:01:14,892] [INFO] T0G_Tournament_Bot: Slash commands synced. Total commands: 11
+[2025-12-25 03:01:14,892] [INFO] T0G_Tournament_Bot: setup_hook finished.
+[2025-12-25 03:01:15,334] [INFO] discord.gateway: Shard ID None has connected to Gateway (Session ID: 1e9ba27e36e5b3cf4671f786e6c3fd02).
+[2025-12-25 03:01:17,365] [INFO] T0G_Tournament_Bot: Logged in as T0G Tournament Bot#9700 (ID: 1441333225753677927)
+[2025-12-25 03:01:17,365] [INFO] T0G_Tournament_Bot: T0G Tournament Bot is online and ready.

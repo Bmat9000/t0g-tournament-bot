@@ -166,7 +166,18 @@ ON action_log(guild_id, created_at);
 @with_conn
 def init_db(conn: sqlite3.Connection) -> None:
     """Initialize DB schema and run lightweight migrations (no behavior change)."""
+    def _table_exists(table: str) -> bool:
+        row = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name=? LIMIT 1;",
+            (table,),
+        ).fetchone()
+        return row is not None
+
     def _ensure_column(table: str, column: str, ddl: str) -> None:
+        # Older DBs may not have some newer tables at all. In that case, we
+        # skip ALTER TABLE and let the schema create the table on the retry.
+        if not _table_exists(table):
+            return
         cols = [r[1] for r in conn.execute(f"PRAGMA table_info({table})").fetchall()]
         if column not in cols:
             conn.execute(ddl)
